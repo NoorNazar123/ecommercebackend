@@ -15,8 +15,10 @@ export class AuthController {
   @UseGuards(LocalAuthGuard)
   @Post("login")
   loginUser(@Request() req) {
-    return req.user; // Authenticated user is attached to req.user
+    // return req.user; // Authenticated user is attached to req.user
+    return this.authService.login(req.user.id, req.user.username)
+
   }
 
 
-} 
+}    
