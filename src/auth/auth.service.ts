@@ -1,9 +1,16 @@
-import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
+
+
+
+import { ConflictException, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { verify } from 'argon2';
 import { CreateUserDto } from 'src/user/dto/create-user-dto';
 import { UserService } from 'src/user/user.service';
 import { AuthJwtPayload } from './type/auth-jwtPayload';
 import { JwtService } from '@nestjs/jwt';
+import refreshConfig from './config/refresh.config';
+import { ConfigType } from '@nestjs/config';
+
+
 
 
 
@@ -11,9 +18,11 @@ import { JwtService } from '@nestjs/jwt';
 export class AuthService {
     constructor(
         private readonly usersService: UserService,
-        private readonly jwtServce: JwtService,
-    ) { }
+        private readonly jwtService: JwtService,
+        @Inject(refreshConfig.KEY)
+        private refreshTokenConfig: ConfigType<typeof refreshConfig>
 
+    ) { }
     async registerUser(createUserDto: CreateUserDto) {
         const { email } = createUserDto;
 
@@ -39,22 +48,25 @@ export class AuthService {
     }
 
     async login(userId: number, username?: string) {
-        const { accessToken } = await this.generateTokens(userId); // Extract from object
+        const { accessToken, refreshToken } = await this.generateTokens(userId); // Extract from object
 
         return {
             id: userId,
             username: username,
-            accessToken
+            accessToken,
+            refreshToken,
         };
     }
 
     async generateTokens(userId: number) {
         const payload: AuthJwtPayload = { sub: userId }
-        const [accessToken] = await Promise.all([
-            this.jwtServce.signAsync(payload)
+        const [accessToken, refreshToken] = await Promise.all([
+            this.jwtService.signAsync(payload),
+            this.jwtService.signAsync(payload, this.refreshTokenConfig)
         ])
         return {
             accessToken,
+            refreshToken,
         }
     }
 

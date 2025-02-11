@@ -9,12 +9,14 @@ import { JwtModule } from '@nestjs/jwt';
 import jwtConfig from './config/jwt.config';
 import { ConfigModule } from '@nestjs/config';
 import { JwtStrategy } from './strategie/jwt.strategy';
+import refreshConfig from './config/refresh.config';
 
 @Module({
   imports: [
     HashModule,
     JwtModule.registerAsync(jwtConfig.asProvider()),
-    ConfigModule.forFeature(jwtConfig)
+    ConfigModule.forFeature(jwtConfig), // 👈 Separate calls
+    ConfigModule.forFeature(refreshConfig) // 👈 Separate calls
   ], // 👈 Add HashModule to imports
   controllers: [AuthController],
   providers: [
