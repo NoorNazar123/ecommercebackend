@@ -14,9 +14,3 @@ export default registerAs("jwt", (): JwtModuleOptions => ({
     },
 }));
 
-// export default registerAs("jwt", (): JwtModuleOptions => ({
-//     secret: process.env.JWT_SECRET_TOKEN,
-//     signOptions: {
-//         expiresIn: process.env.JWT_EXPIRES_TOKEN, // Default to 1 hour if missing
-//     }
-// }));

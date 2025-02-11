@@ -78,6 +78,25 @@ export class AuthService {
         return currentUser
     }
 
+    async validateRefreshToken(userId: number) {
+        const user = await this.usersService.findOne(userId);
+        if (!user) throw new UnauthorizedException("user not found!");
+        const currentUser = { id: user.id };
+
+        return currentUser
+    }
+
+    async refreshToken(userId: number, username: string) {
+        const { accessToken, refreshToken } = await this.generateTokens(userId); // Extract from object
+
+        return {
+            id: userId,
+            username: username,
+            accessToken,
+            refreshToken,
+        };
+    }
+
 }
 
 

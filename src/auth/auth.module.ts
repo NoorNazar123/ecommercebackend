@@ -10,6 +10,8 @@ import jwtConfig from './config/jwt.config';
 import { ConfigModule } from '@nestjs/config';
 import { JwtStrategy } from './strategie/jwt.strategy';
 import refreshConfig from './config/refresh.config';
+import { RereshStrategy } from './strategie/refresh.token.strategy';
+import { RefreshAuthGuard } from './guards/refresh-auth/refresh-auth.guard';
 
 @Module({
   imports: [
@@ -24,7 +26,12 @@ import refreshConfig from './config/refresh.config';
     UserService,
     PrismaDbService,
     LocalStrategy,
-    JwtStrategy
+    JwtStrategy,
+    RereshStrategy,
+    RefreshAuthGuard,
   ],
+  exports: [
+    RefreshAuthGuard
+  ]
 })
 export class AuthModule { }

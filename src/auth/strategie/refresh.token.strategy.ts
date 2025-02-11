@@ -5,24 +5,26 @@ import jwtConfig from "../config/jwt.config";
 import { ConfigType } from "@nestjs/config";
 import type { AuthJwtPayload } from "../type/auth-jwtPayload";
 import { AuthService } from "../auth.service";
+import refreshConfig from "../config/refresh.config";
 
 @Injectable()
-export class JwtStrategy extends PassportStrategy(Strategy) {
+export class RereshStrategy extends PassportStrategy(Strategy, "refresh-jwt") {
     constructor(
-        @Inject(jwtConfig.KEY)
-        private jwtConfiguration: ConfigType<typeof jwtConfig>,
+        @Inject(refreshConfig.KEY)
+        private refreshTokenConfig: ConfigType<typeof refreshConfig>,
         private authService: AuthService
     ) {
         super({
-            jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-            secretOrKey: jwtConfiguration.secret || (() => { throw new Error("JWT secret key is missing"); })(),
+            jwtFromRequest: ExtractJwt.fromBodyField('refresh'),
+            secretOrKey: refreshTokenConfig.secret || (() => { throw new Error("JWT secret key is missing"); })(),
             ignoreExpiration: false,
         });
     }
 
+    //request.user
     async validate(payload: AuthJwtPayload) {
         const userId = payload.sub;
-        const user = await this.authService.validationJwtUser(userId);
+        const user = await this.authService.validateRefreshToken(userId);
         if (!user) {
             throw new UnauthorizedException("User not found");
         }
