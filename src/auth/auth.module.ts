@@ -12,13 +12,16 @@ import { JwtStrategy } from './strategie/jwt.strategy';
 import refreshConfig from './config/refresh.config';
 import { RereshStrategy } from './strategie/refresh.token.strategy';
 import { RefreshAuthGuard } from './guards/refresh-auth/refresh-auth.guard';
+import googleOauthConfig from './config/google.oauth.config';
+import { GoogleStrategy } from './strategie/google.strategy';
 
 @Module({
   imports: [
     HashModule,
     JwtModule.registerAsync(jwtConfig.asProvider()),
-    ConfigModule.forFeature(jwtConfig), // 👈 Separate calls
-    ConfigModule.forFeature(refreshConfig) // 👈 Separate calls
+    ConfigModule.forFeature(jwtConfig), // 👈 Separate calls we can only one value init 
+    ConfigModule.forFeature(refreshConfig), // 👈 Separate calls
+    ConfigModule.forFeature(googleOauthConfig)
   ], // 👈 Add HashModule to imports
   controllers: [AuthController],
   providers: [
@@ -29,6 +32,7 @@ import { RefreshAuthGuard } from './guards/refresh-auth/refresh-auth.guard';
     JwtStrategy,
     RereshStrategy,
     RefreshAuthGuard,
+    GoogleStrategy,
   ],
   exports: [
     RefreshAuthGuard

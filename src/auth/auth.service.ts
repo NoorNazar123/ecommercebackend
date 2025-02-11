@@ -97,6 +97,16 @@ export class AuthService {
         };
     }
 
+    async validateGoogleUser(googleUser: CreateUserDto) {
+        const user = await this.usersService.findByEmail(googleUser.email);
+        if (user) return user;
+        return await this.usersService.create(googleUser);
+    }
+
+    async signOut(userId: number) {
+        // return await this.usersService.updateHashedRefreshToken(userId, null);
+    }
+
 }
 
 
