@@ -58,6 +58,14 @@ export class AuthService {
         }
     }
 
+    async validationJwtUser(userId: number) {
+        const user = await this.usersService.findOne(userId);
+        if (!user) throw new UnauthorizedException("user not found!");
+        const currentUser = { id: user.id };
+
+        return currentUser
+    }
+
 }
 
 

@@ -6,10 +6,17 @@ import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { ConfigModule } from '@nestjs/config';
 
-
 @Module({
-  imports: [PrismaDbModule, AuthModule, UserModule, ConfigModule.forRoot({ isGlobal: true })],
+  imports: [
+    PrismaDbModule,
+    AuthModule,
+    UserModule,
+    ConfigModule.forRoot({
+      isGlobal: true, // Makes the configuration available globally
+      envFilePath: '.env', // Explicitly load the .env file
+    }),
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule { }
+export class AppModule { }   

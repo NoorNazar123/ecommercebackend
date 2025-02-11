@@ -40,6 +40,15 @@ export class UserService {
     });
   }
 
+  async findOne(userId: number) {
+    return await this.prisma.user.findUnique({
+      where: {
+        id: userId, // Fixed issue: email is now passed correctly
+      },
+    });
+  }
+
+
   // findAll() {
   //   return `This action returns all user`;
   // }

@@ -8,12 +8,21 @@ import { LocalStrategy } from './strategie/local.strategies';
 import { JwtModule } from '@nestjs/jwt';
 import jwtConfig from './config/jwt.config';
 import { ConfigModule } from '@nestjs/config';
+import { JwtStrategy } from './strategie/jwt.strategy';
 
 @Module({
-  imports: [HashModule, JwtModule.registerAsync(jwtConfig.asProvider()),
+  imports: [
+    HashModule,
+    JwtModule.registerAsync(jwtConfig.asProvider()),
     ConfigModule.forFeature(jwtConfig)
   ], // 👈 Add HashModule to imports
   controllers: [AuthController],
-  providers: [AuthService, UserService, PrismaDbService, LocalStrategy],
+  providers: [
+    AuthService,
+    UserService,
+    PrismaDbService,
+    LocalStrategy,
+    JwtStrategy
+  ],
 })
 export class AuthModule { }
