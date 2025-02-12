@@ -8,6 +8,7 @@ import { JwtService } from '@nestjs/jwt';
 import refreshConfig from './config/refresh.config';
 import { ConfigType } from '@nestjs/config';
 import { HashService } from 'src/common/hash/hash.service';
+import { Role } from '@prisma/client';
 
 
 
@@ -36,14 +37,14 @@ export class AuthService {
 
     }
 
-    async validateUserLocal(email: string, password: string): Promise<any> {
+    async validateUserLocal(email: string, password: string) {
         const user = await this.usersService.findByEmail(email);
         if (!user) throw new UnauthorizedException("User not found. Please register!");
 
         const isPasswordMatched = await verify(user.password, password); // Ensure `await` is used
         if (!isPasswordMatched) throw new UnauthorizedException("Wrong password");
 
-        return { id: user.id, username: user.username }; // Return user if authentication is successful
+        return { id: user.id, username: user.username, role: user.role }; // Return user if authentication is successful
     }
 
     // async login(userId: number, username?: string) {
@@ -55,8 +56,8 @@ export class AuthService {
     //         accessToken,
     //         refreshToken,
     //     };
-    // }
-    async login(userId: number, username?: string) {
+    // }      
+    async login(userId: number, username?: string, role?: Role) {
         const { accessToken, refreshToken } = await this.generateTokens(userId);
 
         // Hash and store the refresh token in the database
@@ -66,6 +67,7 @@ export class AuthService {
         return {
             id: userId,
             username: username,
+            role,
             accessToken,
             refreshToken,
         };
@@ -86,7 +88,7 @@ export class AuthService {
     async validationJwtUser(userId: number) {
         const user = await this.usersService.findOne(userId);
         if (!user) throw new UnauthorizedException("user not found!");
-        const currentUser = { id: user.id };
+        const currentUser = { id: user.id, role: user.role };
 
         return currentUser
     }

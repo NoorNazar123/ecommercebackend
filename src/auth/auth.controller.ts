@@ -5,8 +5,10 @@ import { LocalAuthGuard } from './guards/local-auth/local-auth.guard';
 import { JwtAuthGuard } from './guards/jwt-auth/jwt-auth.guard';
 import { RefreshAuthGuard } from './guards/refresh-auth/refresh-auth.guard';
 import { GoogleAuthGuardTsGuard } from './guards/google-auth.guard.ts/google-auth.guard.ts.guard';
-import { Response } from 'express';
+import { response, Response } from 'express';
 import { Public } from './decorators/public.decorator';
+import { Roles } from './decorators/role.decorator';
+import { RolesGuard } from './guards/roles/roles.guard';
 
 
 @Controller('auth')
@@ -23,10 +25,13 @@ export class AuthController {
   @Post("login")
   loginUser(@Request() req) {
     // return req.user; // Authenticated user is attached to req.user
-    return this.authService.login(req.user.id, req.user.username)
+    return this.authService.login(req.user.id, req.user.username, req.user.role)
 
   }
 
+
+  @Roles("ADMIN", "EDITOR")
+  @UseGuards(RolesGuard)
   @UseGuards(JwtAuthGuard) //now we no need buz we defined in auth module global guard
   @Get("protected")
   getAll(@Request() req) {
@@ -57,13 +62,13 @@ export class AuthController {
   @Get('google/callback')
   async googleCallback(@Request() req, @Res() res: Response) {
     // console.log('Google User', req.user);
-    const resopnse = await this.authService.login(
+    const response = await this.authService.login(
       req.user.id,
       req.user.username,
-      // req.user.role,
+      req.user.role,
     );
     res.redirect(
-      `http://localhost:3000/api/auth/google/callback?userId=${resopnse.id}&username=${resopnse.username}&accessToken=${resopnse.accessToken}&refreshToken=${resopnse.refreshToken}`,
+      `http://localhost:3000/api/auth/google/callback?userId=${response.id}&username=${response.username}&accessToken=${response.accessToken}&refreshToken=${response.refreshToken}&role=${response.role}`,
     );
   }
 

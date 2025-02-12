@@ -15,6 +15,7 @@ import { RefreshAuthGuard } from './guards/refresh-auth/refresh-auth.guard';
 import googleOauthConfig from './config/google.oauth.config';
 import { GoogleStrategy } from './strategie/google.strategy';
 import { JwtAuthGuard } from './guards/jwt-auth/jwt-auth.guard';
+import { RolesGuard } from './guards/roles/roles.guard';
 
 @Module({
   imports: [
@@ -35,9 +36,13 @@ import { JwtAuthGuard } from './guards/jwt-auth/jwt-auth.guard';
     RefreshAuthGuard,
     GoogleStrategy,
     // {
-    //   provide: " APP_GUARD", //it anble all api attached gurd of auth controller like this  @UseGuards(JwtAuthGuard) 
+    //   provide: " APP_GUARD", //it enble all api attached gurd of auth controller like this  @UseGuards(JwtAuthGuard) 
     //   useClass: JwtAuthGuard,
     // },
+    // {
+    // provide: " APP_GUARD", //if we use global 
+    // },
+
 
   ],
   exports: [
