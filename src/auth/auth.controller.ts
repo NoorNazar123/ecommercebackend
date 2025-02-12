@@ -6,6 +6,7 @@ import { JwtAuthGuard } from './guards/jwt-auth/jwt-auth.guard';
 import { RefreshAuthGuard } from './guards/refresh-auth/refresh-auth.guard';
 import { GoogleAuthGuardTsGuard } from './guards/google-auth.guard.ts/google-auth.guard.ts.guard';
 import { Response } from 'express';
+import { Public } from './decorators/public.decorator';
 
 
 @Controller('auth')
@@ -17,6 +18,7 @@ export class AuthController {
     return this.authService.registerUser(createUserDto)
   }
 
+  // @Public()
   @UseGuards(LocalAuthGuard)
   @Post("login")
   loginUser(@Request() req) {
@@ -25,7 +27,7 @@ export class AuthController {
 
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard) //now we no need buz we defined in auth module global guard
   @Get("protected")
   getAll(@Request() req) {
     return {
@@ -37,17 +39,20 @@ export class AuthController {
   // refreshToken(@Request() req) {
   //   return this.authService.refreshToken(req.user.id, req.user.username)
   // }
+  // @Public()
   @UseGuards(RefreshAuthGuard)
   @Post("refresh")
   refreshToken(@Request() req) {
     console.log("Received Refresh Token:", req.body.refresh); // Debugging Log
     return this.authService.refreshToken(req.user.id, req.user.username);
   }
-
+  // @Public()
   @UseGuards(GoogleAuthGuardTsGuard)
   @Get("google/login")
   async googleLogin() { }
 
+
+  // @Public()
   @UseGuards(GoogleAuthGuardTsGuard)
   @Get('google/callback')
   async googleCallback(@Request() req, @Res() res: Response) {
@@ -62,7 +67,7 @@ export class AuthController {
     );
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)//now we no need buz we defined in auth module global guard
   @Post('signout')
   signOut(@Req() req) {
     return this.authService.signOut(req.user.id);

@@ -14,6 +14,7 @@ import { RereshStrategy } from './strategie/refresh.token.strategy';
 import { RefreshAuthGuard } from './guards/refresh-auth/refresh-auth.guard';
 import googleOauthConfig from './config/google.oauth.config';
 import { GoogleStrategy } from './strategie/google.strategy';
+import { JwtAuthGuard } from './guards/jwt-auth/jwt-auth.guard';
 
 @Module({
   imports: [
@@ -33,6 +34,10 @@ import { GoogleStrategy } from './strategie/google.strategy';
     RereshStrategy,
     RefreshAuthGuard,
     GoogleStrategy,
+    // {
+    //   provide: " APP_GUARD", //it anble all api attached gurd of auth controller like this  @UseGuards(JwtAuthGuard) 
+    //   useClass: JwtAuthGuard,
+    // },
 
   ],
   exports: [
