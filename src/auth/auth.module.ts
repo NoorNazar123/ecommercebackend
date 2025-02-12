@@ -33,6 +33,7 @@ import { GoogleStrategy } from './strategie/google.strategy';
     RereshStrategy,
     RefreshAuthGuard,
     GoogleStrategy,
+
   ],
   exports: [
     RefreshAuthGuard

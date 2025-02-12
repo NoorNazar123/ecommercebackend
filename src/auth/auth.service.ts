@@ -1,6 +1,4 @@
 
-
-
 import { ConflictException, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { verify } from 'argon2';
 import { CreateUserDto } from 'src/user/dto/create-user-dto';
@@ -9,7 +7,7 @@ import { AuthJwtPayload } from './type/auth-jwtPayload';
 import { JwtService } from '@nestjs/jwt';
 import refreshConfig from './config/refresh.config';
 import { ConfigType } from '@nestjs/config';
-
+import { HashService } from 'src/common/hash/hash.service';
 
 
 
@@ -17,6 +15,7 @@ import { ConfigType } from '@nestjs/config';
 @Injectable()
 export class AuthService {
     constructor(
+        private readonly hashService: HashService,
         private readonly usersService: UserService,
         private readonly jwtService: JwtService,
         @Inject(refreshConfig.KEY)
@@ -47,8 +46,22 @@ export class AuthService {
         return { id: user.id, username: user.username }; // Return user if authentication is successful
     }
 
+    // async login(userId: number, username?: string) {
+    //     const { accessToken, refreshToken } = await this.generateTokens(userId); // Extract from object
+
+    //     return {
+    //         id: userId,
+    //         username: username,
+    //         accessToken,
+    //         refreshToken,
+    //     };
+    // }
     async login(userId: number, username?: string) {
-        const { accessToken, refreshToken } = await this.generateTokens(userId); // Extract from object
+        const { accessToken, refreshToken } = await this.generateTokens(userId);
+
+        // Hash and store the refresh token in the database
+        const hashedRefreshToken = await this.hashService.hashPassword(refreshToken);
+        await this.usersService.updateHashedRefreshToken(userId, hashedRefreshToken);
 
         return {
             id: userId,
@@ -78,16 +91,24 @@ export class AuthService {
         return currentUser
     }
 
-    async validateRefreshToken(userId: number) {
+    async validateRefreshToken(userId: number, refreshToken: string) {
         const user = await this.usersService.findOne(userId);
-        if (!user) throw new UnauthorizedException("user not found!");
-        const currentUser = { id: user.id };
+        if (!user) throw new UnauthorizedException("User not found!");
 
-        return currentUser
+        const refreshTokenMatched = user.hashedRefreshToken
+            ? await this.hashService.verifyPassword(user.hashedRefreshToken, refreshToken)
+            : false;
+
+        if (!refreshTokenMatched) throw new UnauthorizedException("Invalid refresh token");
+
+        return { id: user.id };
     }
 
     async refreshToken(userId: number, username: string) {
         const { accessToken, refreshToken } = await this.generateTokens(userId); // Extract from object
+        // now it for refresh token
+        const hashedRefreshToken = await this.hashService.hashPassword(refreshToken);
+        await this.usersService.updateHashedRefreshToken(userId, hashedRefreshToken)
 
         return {
             id: userId,
@@ -104,7 +125,7 @@ export class AuthService {
     }
 
     async signOut(userId: number) {
-        // return await this.usersService.updateHashedRefreshToken(userId, null);
+        return await this.usersService.updateHashedRefreshToken(userId, null);
     }
 
 }

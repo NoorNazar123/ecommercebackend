@@ -14,11 +14,12 @@ datasource db {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  username  String   @unique
-  email     String   @unique
-  password  String
-  isAdmin   Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                 Int      @id @default(autoincrement())
+  username           String   @unique
+  email              String   @unique
+  password           String
+  hashedRefreshToken String?
+  isAdmin            Boolean  @default(false)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 }
