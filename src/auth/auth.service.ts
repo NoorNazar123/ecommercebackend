@@ -1,5 +1,5 @@
 
-import { ConflictException, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import { ConflictException, Inject, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { verify } from 'argon2';
 import { CreateUserDto } from 'src/user/dto/create-user-dto';
 import { UserService } from 'src/user/user.service';
@@ -9,6 +9,7 @@ import refreshConfig from './config/refresh.config';
 import { ConfigType } from '@nestjs/config';
 import { HashService } from 'src/common/hash/hash.service';
 import { Role } from '@prisma/client';
+import { MailService } from 'src/mail/mail.service';
 
 
 
@@ -19,6 +20,7 @@ export class AuthService {
         private readonly hashService: HashService,
         private readonly usersService: UserService,
         private readonly jwtService: JwtService,
+        private readonly mailService: MailService, // Inject MailService
         @Inject(refreshConfig.KEY)
         private refreshTokenConfig: ConfigType<typeof refreshConfig>
 
@@ -33,8 +35,32 @@ export class AuthService {
         }
 
         // Create and return the new user
-        return await this.usersService.create(createUserDto);
+        const newUser = await this.usersService.create(createUserDto);
 
+        // Generate a verification token
+        const verificationToken = Math.random().toString(36).substring(2, 15);
+
+        // Send verification email
+        await this.mailService.sendVerificationEmail(email, verificationToken);
+
+        return newUser;
+
+    }
+
+    async verifyEmail(token: string) {
+        // Find the user by the verification token
+        const user = await this.usersService.findByVerificationToken(token);
+        if (!user) {
+            throw new NotFoundException('Invalid or expired verification token.');
+        }
+
+        // Mark the user as verified and clear the verification token
+        await this.usersService.update(user.id, {
+            isVerified: true,
+            verificationToken: null,
+        });
+
+        return { message: 'Email verified successfully!' };
     }
 
     async validateUserLocal(email: string, password: string) {
@@ -47,16 +73,7 @@ export class AuthService {
         return { id: user.id, username: user.username, role: user.role }; // Return user if authentication is successful
     }
 
-    // async login(userId: number, username?: string) {
-    //     const { accessToken, refreshToken } = await this.generateTokens(userId); // Extract from object
 
-    //     return {
-    //         id: userId,
-    //         username: username,
-    //         accessToken,
-    //         refreshToken,
-    //     };
-    // }      
     async login(userId: number, username?: string, role?: Role) {
         const { accessToken, refreshToken } = await this.generateTokens(userId);
 

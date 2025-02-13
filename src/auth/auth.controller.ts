@@ -1,10 +1,10 @@
-import { Body, Controller, Get, Post, Req, Request, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, Req, Request, Res, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from "../user/dto/create-user-dto"
 import { LocalAuthGuard } from './guards/local-auth/local-auth.guard';
 import { JwtAuthGuard } from './guards/jwt-auth/jwt-auth.guard';
 import { RefreshAuthGuard } from './guards/refresh-auth/refresh-auth.guard';
-import { GoogleAuthGuardTsGuard } from './guards/google-auth.guard.ts/google-auth.guard.ts.guard';
+import { GoogleAuthGuard } from './guards/google-auth.guard.ts/google.guard';
 import { response, Response } from 'express';
 import { Public } from './decorators/public.decorator';
 import { Roles } from './decorators/role.decorator';
@@ -20,6 +20,13 @@ export class AuthController {
     return this.authService.registerUser(createUserDto)
   }
 
+  @Get('verify-email')
+  async verifyEmail(@Query('token') token: string) {
+    console.log("Received token:", token);
+    return this.authService.verifyEmail(token);
+  }
+
+
   // @Public()
   @UseGuards(LocalAuthGuard)
   @Post("login")
@@ -28,6 +35,8 @@ export class AuthController {
     return this.authService.login(req.user.id, req.user.username, req.user.role)
 
   }
+
+
 
 
   @Roles("ADMIN", "EDITOR")
@@ -52,13 +61,13 @@ export class AuthController {
     return this.authService.refreshToken(req.user.id, req.user.username);
   }
   // @Public()
-  @UseGuards(GoogleAuthGuardTsGuard)
+  @UseGuards(GoogleAuthGuard)
   @Get("google/login")
   async googleLogin() { }
 
 
   // @Public()
-  @UseGuards(GoogleAuthGuardTsGuard)
+  @UseGuards(GoogleAuthGuard)
   @Get('google/callback')
   async googleCallback(@Request() req, @Res() res: Response) {
     // console.log('Google User', req.user);

@@ -16,6 +16,7 @@ import googleOauthConfig from './config/google.oauth.config';
 import { GoogleStrategy } from './strategie/google.strategy';
 import { JwtAuthGuard } from './guards/jwt-auth/jwt-auth.guard';
 import { RolesGuard } from './guards/roles/roles.guard';
+import { MailModule } from 'src/mail/mail.module';
 
 @Module({
   imports: [
@@ -23,7 +24,8 @@ import { RolesGuard } from './guards/roles/roles.guard';
     JwtModule.registerAsync(jwtConfig.asProvider()),
     ConfigModule.forFeature(jwtConfig), // 👈 Separate calls we can only one value init 
     ConfigModule.forFeature(refreshConfig), // 👈 Separate calls
-    ConfigModule.forFeature(googleOauthConfig)
+    ConfigModule.forFeature(googleOauthConfig),
+    MailModule,
   ], // 👈 Add HashModule to imports
   controllers: [AuthController],
   providers: [

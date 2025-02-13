@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user-dto';
 import { PrismaDbService } from 'src/prisma-db/prisma-db.service';
 import { HashService } from 'src/common/hash/hash.service';
+import { v4 as uuidv4 } from 'uuid';
+import { Prisma } from '@prisma/client';
 
 
 
@@ -24,10 +26,13 @@ export class UserService {
 
     const hashedPassword = await this.hashService.hashPassword(createUserDto.password);
 
+    const verificationToken = uuidv4();
+
     return await this.prisma.user.create({
       data: {
         password: hashedPassword,
-        ...user
+        ...user,
+        verificationToken,
       },
     });
   }
@@ -59,6 +64,18 @@ export class UserService {
     });
   }
 
+  async findByVerificationToken(token: string) {
+    return this.prisma.user.findUnique({
+      where: { verificationToken: token },
+    });
+  }
+
+  async update(userId: number, data: Prisma.UserUpdateInput) {
+    return this.prisma.user.update({
+      where: { id: userId },
+      data,
+    });
+  }
   // findAll() {
   //   return `This action returns all user`;
   // }

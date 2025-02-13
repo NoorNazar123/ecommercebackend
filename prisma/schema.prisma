@@ -19,6 +19,8 @@ model User {
   email              String   @unique
   password           String
   hashedRefreshToken String?
+  isVerified         Boolean  @default(false)
+  verificationToken  String?  @unique // ✅ Making it unique
   role               Role     @default(USER)
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
