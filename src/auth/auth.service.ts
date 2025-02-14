@@ -10,6 +10,8 @@ import { ConfigType } from '@nestjs/config';
 import { HashService } from 'src/common/hash/hash.service';
 import { Role } from '@prisma/client';
 import { MailService } from 'src/mail/mail.service';
+import { v4 as uuidv4 } from 'uuid';
+
 
 
 
@@ -34,11 +36,13 @@ export class AuthService {
             throw new ConflictException('User already exists!');
         }
 
+        const verificationToken = uuidv4(); // Use UUID for consistency
+
         // Create and return the new user
-        const newUser = await this.usersService.create(createUserDto);
+        const newUser = await this.usersService.create(createUserDto, verificationToken);
 
         // Generate a verification token
-        const verificationToken = Math.random().toString(36).substring(2, 15);
+        // const verificationToken = Math.random().toString(36).substring(2, 15);
 
         // Send verification email
         await this.mailService.sendVerificationEmail(email, verificationToken);
@@ -47,18 +51,25 @@ export class AuthService {
 
     }
 
+
     async verifyEmail(token: string) {
+        console.log('Received token:', token);
+
         // Find the user by the verification token
         const user = await this.usersService.findByVerificationToken(token);
         if (!user) {
+            console.error('User not found for token:', token);
             throw new NotFoundException('Invalid or expired verification token.');
         }
 
         // Mark the user as verified and clear the verification token
-        await this.usersService.update(user.id, {
+        const updatedUser = await this.usersService.update(user.id, {
             isVerified: true,
             verificationToken: null,
         });
+
+        console.log("Updated user: ", updatedUser);
+
 
         return { message: 'Email verified successfully!' };
     }
