@@ -77,11 +77,27 @@ export class AuthService {
 
   async validateUserLocal(email: string, password: string) {
     const user = await this.usersService.findByEmail(email);
+
+    if (!user?.isVerified) {
+      throw new UnauthorizedException(
+        'please register or verify your account!'
+      );
+    }
+
+    if (!email) {
+      throw new UnauthorizedException(
+        'Email not found Please register your account!'
+      );
+    }
+
     if (!user)
-      throw new UnauthorizedException('User not found. Please register!');
+      throw new UnauthorizedException(
+        'User not found. Please register your account!'
+      );
 
     const isPasswordMatched = await verify(user.password, password); // Ensure `await` is used
-    if (!isPasswordMatched) throw new UnauthorizedException('Wrong password');
+    if (!isPasswordMatched)
+      throw new UnauthorizedException('Wrong password! Please try again.');
 
     return { id: user.id, username: user.username, role: user.role }; // Return user if authentication is successful
   }

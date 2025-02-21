@@ -80,11 +80,7 @@ export class AuthController {
       message: `You have accessed a protected API. This is your user ID: ${req.user.id}`,
     };
   }
-  // @UseGuards(RefreshAuthGuard)
-  // @Post("refresh")
-  // refreshToken(@Request() req) {
-  //   return this.authService.refreshToken(req.user.id, req.user.username)
-  // }
+
   // @Public()
   @UseGuards(RefreshAuthGuard)
   @Post('refresh')
@@ -101,7 +97,6 @@ export class AuthController {
   @UseGuards(GoogleAuthGuard)
   @Get('google/callback')
   async googleCallback(@Request() req, @Res() res: Response) {
-    // console.log('Google User', req.user);
     const response = await this.authService.login(
       req.user.id,
       req.user.username,
