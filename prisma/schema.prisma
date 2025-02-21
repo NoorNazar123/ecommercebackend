@@ -20,7 +20,9 @@ model User {
   password           String
   hashedRefreshToken String?
   isVerified         Boolean  @default(false)
-  verificationToken  String?  @unique // ✅ Making it unique
+  verificationToken  String?  @unique    
+  resetPasswordToken    String?  
+  resetPasswordExpires  DateTime? 
   role               Role     @default(USER)
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
