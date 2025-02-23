@@ -285,13 +285,11 @@ Deploy to AWS, Heroku, or any cloud platform of your choice.
 Contributing
 We welcome contributions! Please follow these steps:
 
-Fork the repository.
+# Fork the repository.
 
-Create a new branch (git checkout -b feature/your-feature).
-
+Create a new branch (git checkout -b feature-your-branch-name).
 Commit your changes (git commit -m 'Add some feature').
-
-Push to the branch (git push origin feature/your-feature).
+Push to the branch (git push origin feature-your-branch-name).
 
 Open a pull request.
 
