@@ -1,35 +1,102 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+  // This is your Prisma schema file,
+  // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+  // Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+  // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
-generator client {
-  provider = "prisma-client-js"
-}
+  generator client {
+    provider = "prisma-client-js"
+  }
 
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-}
+  datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+  }
 
-model User {
-  id                 Int      @id @default(autoincrement())
-  username           String   @unique
-  email              String   @unique
-  password           String
-  hashedRefreshToken String?
-  isVerified         Boolean  @default(false)
-  verificationToken  String?  @unique    
-  resetPasswordToken    String?  
-  resetPasswordExpires  DateTime? 
-  role               Role     @default(USER)
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
-}
+  model User {
+    id                 Int      @id @default(autoincrement())
+    username           String   @unique
+    email              String   @unique
+    password           String
+    hashedRefreshToken String?
+    isVerified         Boolean  @default(false)
+    verificationToken  String?  @unique    
+    resetPasswordToken    String?  
+    resetPasswordExpires  DateTime? 
+    role               Role     @default(USER)
+    createdAt          DateTime @default(now())
+    updatedAt          DateTime @updatedAt
 
-enum Role {
-  ADMIN
-  EDITOR
-  USER
-}
+    ProductReview ProductReview[]
+  }
+
+  enum Role {
+    ADMIN
+    EDITOR
+    USER
+  }
+  model Product {
+    id          Int       @id @default(autoincrement())
+    name        String
+    description String?
+    price       Decimal
+    stock       Int
+    sku         String   @unique
+    images      String[] // Array to store multiple image URLs
+    categoryId  Int      // Foreign key to Category
+    category    Category @relation(fields: [categoryId], references: [id])
+    isActive    Boolean  @default(true)
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    variants    ProductVariant[]
+    reviews     ProductReview[]
+    discounts   ProductDiscount[]
+  }  
+  model Category {
+    id          Int       @id @default(autoincrement())
+    name        String    @unique
+    description String?
+    products    Product[]
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+  }
+
+  model ProductVariant {
+    id          Int      @id @default(autoincrement())
+    productId   Int
+    product     Product @relation(fields: [productId], references: [id])
+    name        String  // Example: "Red, Medium"
+    price       Decimal
+    stock       Int
+    sku         String  @unique
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+  }
+
+  model ProductReview {
+    id        Int      @id @default(autoincrement())
+    productId Int
+    product   Product @relation(fields: [productId], references: [id])
+    userId    Int
+    user      User    @relation(fields: [userId], references: [id])
+    rating    Int     // 1-5 scale
+    review    String?
+    createdAt DateTime @default(now())
+  }
+
+  model ProductDiscount {
+    id         Int       @id @default(autoincrement())
+    productId  Int
+    product    Product   @relation(fields: [productId], references: [id])
+    discountType DiscountType // Enum (Fixed or Percentage)
+    value      Decimal   // Discount amount (10% or $10)
+    startDate  DateTime?
+    endDate    DateTime?
+    isActive   Boolean   @default(true)
+  }
+
+  enum DiscountType {
+    PERCENTAGE
+    FIXED
+  }
