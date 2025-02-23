@@ -41,14 +41,30 @@ export class ProductsService {
     }
   }
 
-  async findAll() {
-    return this.databaseService.product.findMany();
+  async findAll(filters?: any) {
+    return this.databaseService.product.findMany({
+      where: {
+        ...(filters.categoryId && { categoryId: filters.categoryId }),
+        ...(filters.minPrice && {
+          price: { gte: new Prisma.Decimal(filters.minPrice) },
+        }),
+        ...(filters.maxPrice && {
+          price: { lte: new Prisma.Decimal(filters.maxPrice) },
+        }),
+        ...(filters.stock && { stock: { gte: filters.stock } }),
+      },
+      include: { category: true },
+    });
   }
 
   async findOne(id: number) {
-    return this.databaseService.product.findUnique({
+    const product = await this.databaseService.product.findUnique({
       where: { id },
+      include: { category: true },
     });
+    if (!product)
+      throw new NotFoundException(`Product with ID ${id} not found`);
+    return product;
   }
 
   async update(id: number, updateProductDto: UpdateProductDto) {
