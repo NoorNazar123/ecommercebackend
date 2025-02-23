@@ -136,13 +136,14 @@ API Documentation: Swagger
 Deployment: Docker, AWS, or any cloud platform
 
 Project Structure
-
 src/
 ├── auth/ # Authentication and Authorization
 │ ├── strategies/ # Passport/JWT strategies
 │ ├── guards/ # Auth guards (e.g., JWT guard, Roles guard)
 │ ├── decorators/ # Custom decorators (e.g., @User, @Roles)
 │ ├── interfaces/ # Interfaces for auth-related types
+│ ├── services/ # Auth service (handles authentication logic)
+│ ├── controllers/ # Auth controllers (login, register, etc.)
 │ └── auth.module.ts # Auth module
 │
 ├── users/ # User management
@@ -174,10 +175,52 @@ src/
 │ ├── controllers/ # Cart controllers (API endpoints)
 │ └── cart.module.ts # Cart module
 │
-├── mailer/ # Email services (renamed from "mail")
+├── categories/ # Product categories management
+│ ├── dto/ # DTOs for category-related operations
+│ ├── entities/ # Category entity or Prisma models
+│ ├── services/ # Category service (business logic)
+│ ├── controllers/ # Category controllers (API endpoints)
+│ └── categories.module.ts # Category module
+│
+├── payments/ # Payment processing module
+│ ├── dto/ # DTOs for payment-related operations
+│ ├── services/ # Payment service (business logic)
+│ ├── controllers/ # Payment controllers (API endpoints)
+│ ├── interfaces/ # Interfaces for payment providers
+│ ├── gateways/ # Payment gateway integrations (Stripe, PayPal)
+│ └── payments.module.ts # Payments module
+│
+├── reviews/ # Product reviews and ratings
+│ ├── dto/ # DTOs for reviews-related operations
+│ ├── entities/ # Reviews entity or Prisma models
+│ ├── services/ # Reviews service (business logic)
+│ ├── controllers/ # Reviews controllers (API endpoints)
+│ └── reviews.module.ts # Reviews module
+│
+├── mailer/ # Email services
 │ ├── templates/ # Email templates
 │ ├── services/ # Email service (business logic)
 │ └── mailer.module.ts # Mailer module
+│
+├── notifications/ # Real-time notifications (optional)
+│ ├── services/ # Notification service (business logic)
+│ ├── controllers/ # Notification API endpoints
+│ ├── gateways/ # WebSocket/SSE for real-time notifications
+│ ├── entities/ # Notification entity
+│ └── notifications.module.ts # Notifications module
+│
+├── wishlist/ # Wishlist management
+│ ├── dto/ # DTOs for wishlist-related operations
+│ ├── entities/ # Wishlist entity or Prisma models
+│ ├── services/ # Wishlist service (business logic)
+│ ├── controllers/ # Wishlist controllers (API endpoints)
+│ └── wishlist.module.ts # Wishlist module
+│
+├── shipping/ # Shipping and delivery module
+│ ├── dto/ # DTOs for shipping-related operations
+│ ├── services/ # Shipping service (business logic)
+│ ├── controllers/ # Shipping controllers (API endpoints)
+│ └── shipping.module.ts # Shipping module
 │
 ├── prisma/ # Prisma-related files
 │ ├── schema.prisma # Prisma schema file
@@ -197,7 +240,15 @@ src/
 ├── config/ # Configuration files (e.g., env variables)
 │ ├── app.config.ts # Application configuration
 │ ├── db.config.ts # Database configuration
-│ └── auth.config.ts # Auth configuration
+│ ├── auth.config.ts # Auth configuration
+│ ├── payment.config.ts # Payment configuration
+│ ├── mail.config.ts # Mail configuration
+│ └── shipping.config.ts # Shipping configuration
+│
+├── logs/ # Log files (optional)
+│ ├── app.log # Application logs
+│ ├── errors.log # Error logs
+│ └── access.log # Access logs
 │
 ├── test/ # Test files
 │ ├── unit/ # Unit tests
@@ -206,7 +257,10 @@ src/
 │
 ├── app.module.ts # Root module
 ├── main.ts # Application entry point
-└── ...
+├── .env # Environment variables
+├── .gitignore # Git ignore file
+├── nest-cli.json # Nest CLI configuration
+└── README.md # Project documentation
 
 # Getting Started
 

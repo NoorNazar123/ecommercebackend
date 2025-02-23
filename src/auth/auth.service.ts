@@ -6,15 +6,15 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { verify } from 'argon2';
-import { CreateUserDto } from 'src/user/dto/create-user-dto';
-import { UserService } from 'src/user/user.service';
+import { CreateUserDto } from 'src/users/dto/create-user-dto';
+import { UserService } from 'src/users/user.service';
 import { AuthJwtPayload } from './type/auth-jwtPayload';
 import { JwtService } from '@nestjs/jwt';
 import refreshConfig from './config/refresh.config';
 import { ConfigType } from '@nestjs/config';
 import { HashService } from 'src/common/hash/hash.service';
 import { Role } from '@prisma/client';
-import { MailService } from 'src/mail/mail.service';
+import { MailService } from 'src/mailers/mail.service';
 import { v4 as uuidv4 } from 'uuid';
 import { log } from 'console';
 
