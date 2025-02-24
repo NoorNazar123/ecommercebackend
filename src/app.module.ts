@@ -8,6 +8,9 @@ import { ConfigModule } from '@nestjs/config';
 import { MailModule } from './mailers/mail.module';
 import { ProductsModule } from './products/products.module';
 import { CategoriesModule } from './categories/categories.module';
+import { CartModule } from './cart/cart.module';
+import { WishlistModule } from './wishlist/wishlist.module';
+import { OrdersModule } from './orders/orders.module';
 
 @Module({
   imports: [
@@ -21,6 +24,9 @@ import { CategoriesModule } from './categories/categories.module';
     MailModule,
     ProductsModule,
     CategoriesModule,
+    CartModule,
+    WishlistModule,
+    OrdersModule,
   ],
   controllers: [AppController],
   providers: [AppService],
