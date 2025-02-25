@@ -84,6 +84,12 @@ export class OrdersService {
 
     return updatedOrder;
   }
+  async updateOrderPaymentStatus(orderId: number, status: 'PAID' | 'FAILED') {
+    return this.prisma.order.update({
+      where: { id: orderId },
+      data: { paymentStatus: status },
+    });
+  }
 }
 
 // import { Injectable } from '@nestjs/common';

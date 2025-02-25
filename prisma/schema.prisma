@@ -159,8 +159,11 @@ model Order {
   totalPrice    Decimal
   status        OrderStatus @default(PENDING)
   paymentStatus PaymentStatus @default(UNPAID)
+  Payment       Payment[]
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
+
+  
 }
 
 model OrderItem {
@@ -183,8 +186,31 @@ enum OrderStatus {
   CANCELLED
 }
 
+
 enum PaymentStatus {
-  UNPAID
-  PAID
+  PENDING
+  COMPLETED
   FAILED
-}    
+  REFUNDED
+  UNPAID
+  PAID     
+}
+ 
+model Payment {
+  id            Int            @id @default(autoincrement())
+  paymentId     String         @unique // Payment ID from PayPal/Stripe
+  orderId       Int
+  order         Order          @relation(fields: [orderId], references: [id])
+  amount        Decimal
+  currency      String
+  method        PaymentMethod  // e.g., PayPal, Stripe, Credit Card
+  status        PaymentStatus  @default(PENDING)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}
+
+enum PaymentMethod {
+  PAYPAL
+  STRIPE
+  CREDIT_CARD
+} 
