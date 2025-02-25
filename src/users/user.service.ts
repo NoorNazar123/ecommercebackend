@@ -1,17 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user-dto';
+import { CreateUserDto, UpdateProfileDto } from './dto/create-user-dto';
 import { PrismaDbService } from 'src/prisma-db/prisma-db.service';
 import { HashService } from 'src/common/hash/hash.service';
 import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class UserService {
-  updatedUser(
-    id: number,
-    arg1: { resetPasswordToken: string; resetPasswordExpires: Date }
-  ) {
-    throw new Error('Method not implemented.');
-  }
   constructor(
     private readonly prisma: PrismaDbService,
     private readonly hashService: HashService
@@ -104,7 +98,18 @@ export class UserService {
     // If no user is found with a matching token, return null
     return null;
   }
-
+  async updateProfile(userId: number, data: UpdateProfileDto) {
+    return this.prisma.user.update({
+      where: { id: userId },
+      data,
+    });
+  }
+  updatedUser(
+    id: number,
+    arg1: { resetPasswordToken: string; resetPasswordExpires: Date }
+  ) {
+    throw new Error('Method not implemented.');
+  }
   // findAll() {
   //   return `This action returns all user`;
   // }

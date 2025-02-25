@@ -1,5 +1,4 @@
-// src/orders/dto/create-order.dto.ts
-import { IsInt, IsPositive, IsArray } from 'class-validator';
+import { IsInt, IsPositive, IsArray, IsOptional } from 'class-validator';
 
 export class CreateOrderDto {
   @IsArray()
@@ -11,4 +10,9 @@ export class CreateOrderDto {
   @IsInt({ each: true })
   @IsPositive({ each: true })
   quantities: number[];
+
+  @IsOptional() // Mark addressId as optional
+  @IsInt()
+  @IsPositive()
+  addressId?: number; // Optional addressId for order creation
 }

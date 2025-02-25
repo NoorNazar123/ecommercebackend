@@ -6,6 +6,7 @@ import {
   IsString,
   IsArray,
   IsNumber,
+  IsIn,
 } from 'class-validator';
 
 export class CreateProductDto {
@@ -35,4 +36,7 @@ export class CreateProductDto {
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
+  @IsString()
+  @IsIn(['male', 'female', 'unisex'])
+  gender: 'male' | 'female' | 'unisex';
 }

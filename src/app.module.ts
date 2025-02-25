@@ -11,8 +11,9 @@ import { CategoriesModule } from './categories/categories.module';
 import { CartModule } from './cart/cart.module';
 import { WishlistModule } from './wishlist/wishlist.module';
 import { OrdersModule } from './orders/orders.module';
-import { PaymentModule } from './payment/payment.module';
-import { PaymentsModule } from './payments/payments.module';
+
+import { AddressModule } from './address/address.module';
+import { ReviewModule } from './review/review.module';
 
 @Module({
   imports: [
@@ -29,8 +30,10 @@ import { PaymentsModule } from './payments/payments.module';
     CartModule,
     WishlistModule,
     OrdersModule,
-    PaymentModule,
-    PaymentsModule,
+
+    AddressModule,
+
+    ReviewModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -25,6 +25,11 @@ export class OrdersController {
     return this.ordersService.createOrder({ ...dto, userId: user.id });
   }
 
+  @Get()
+  getAllOrders() {
+    return this.ordersService.getAllOrders();
+  }
+
   @Get(':id')
   getOrder(@Param('id') id: string) {
     return this.ordersService.getOrderById(parseInt(id));

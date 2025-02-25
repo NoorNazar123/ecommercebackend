@@ -10,8 +10,42 @@ import { OrderStatus, PaymentStatus } from '@prisma/client';
 export class OrdersService {
   constructor(private prisma: PrismaDbService) {}
 
+  // async createOrder(dto: CreateOrderDto & { userId: number }) {
+  //   const { userId, productIds, quantities } = dto;
+
+  //   // Fetch products and calculate total price
+  //   const products = await this.prisma.product.findMany({
+  //     where: { id: { in: productIds } },
+  //   });
+
+  //   if (products.length !== productIds.length) {
+  //     throw new NotFoundException('One or more products not found');
+  //   }
+
+  //   const totalPrice = products.reduce((total, product, index) => {
+  //     return total + product.price.mul(quantities[index]).toNumber();
+  //   }, 0);
+
+  //   // Create order
+  //   const order = await this.prisma.order.create({
+  //     data: {
+  //       userId,
+  //       totalPrice,
+  //       items: {
+  //         create: productIds.map((productId, index) => ({
+  //           productId,
+  //           quantity: quantities[index],
+  //           price: products[index].price,
+  //         })),
+  //       },
+  //     },
+  //     include: { items: { include: { product: true } } },
+  //   });
+
+  //   return order;
+  // }
   async createOrder(dto: CreateOrderDto & { userId: number }) {
-    const { userId, productIds, quantities } = dto;
+    const { userId, productIds, quantities, addressId } = dto;
 
     // Fetch products and calculate total price
     const products = await this.prisma.product.findMany({
@@ -26,11 +60,12 @@ export class OrdersService {
       return total + product.price.mul(quantities[index]).toNumber();
     }, 0);
 
-    // Create order
+    // Create order with addressId if available
     const order = await this.prisma.order.create({
       data: {
         userId,
         totalPrice,
+        addressId, // Add the addressId if provided
         items: {
           create: productIds.map((productId, index) => ({
             productId,
@@ -45,6 +80,12 @@ export class OrdersService {
     return order;
   }
 
+  async getAllOrders() {
+    return this.prisma.order.findMany({
+      include: { items: { include: { product: true } } }, // Optional: Include order items
+    });
+  }
+
   async getOrderById(id: number) {
     const order = await this.prisma.order.findUnique({
       where: { id },
@@ -57,15 +98,22 @@ export class OrdersService {
 
     return order;
   }
-
   async updateOrderStatus(id: number, dto: UpdateOrderStatusDto) {
     const order = await this.prisma.order.update({
       where: { id },
-      data: { status: dto.status },
+      data: { status: dto.status }, // Here, dto.status is now correctly typed as OrderStatus
     });
 
     return order;
   }
+  // async updateOrderStatus(id: number, dto: UpdateOrderStatusDto) {
+  //   const order = await this.prisma.order.update({
+  //     where: { id },
+  //     data: { status: dto.status },
+  //   });
+
+  //   return order;
+  // }
   async updatePaymentStatus(id: number) {
     const order = await this.prisma.order.findUnique({ where: { id } });
 
