@@ -17,8 +17,8 @@ export class CreateProductDto {
   @IsString()
   description?: string;
 
-  @IsNumber()
-  price: number; // ✅ Use IsDecimal for Decimal values in Prisma
+  @IsDecimal()
+  price: number;
 
   @IsInt()
   stock: number;
@@ -27,7 +27,7 @@ export class CreateProductDto {
   sku: string;
 
   @IsArray()
-  @IsString({ each: true }) // Ensures every item in the array is a string
+  @IsString({ each: true })
   images: string[];
 
   @IsInt()
@@ -36,6 +36,7 @@ export class CreateProductDto {
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
+
   @IsString()
   @IsIn(['male', 'female', 'unisex'])
   gender: 'male' | 'female' | 'unisex';

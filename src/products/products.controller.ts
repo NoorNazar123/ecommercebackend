@@ -22,6 +22,12 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { tmpdir } from 'os';
 import { promisify } from 'util';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiExtraModels,
+} from '@nestjs/swagger';
 
 @Controller('products')
 export class ProductsController {
@@ -91,6 +97,8 @@ export class ProductsController {
   }
 
   @Get()
+  @ApiOperation({ summary: 'Get all products' })
+  @ApiResponse({ status: 200, description: 'List of products' })
   async findAll(
     @Query('categoryId') categoryId?: number,
     @Query('minPrice') minPrice?: number,
