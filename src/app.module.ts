@@ -14,6 +14,8 @@ import { OrdersModule } from './orders/orders.module';
 
 import { AddressModule } from './address/address.module';
 import { ReviewModule } from './review/review.module';
+import { ProductExtrasController } from './products/product-extras.controller';
+import { ProductExtrasService } from './products/product-extras.service';
 
 @Module({
   imports: [
@@ -35,7 +37,7 @@ import { ReviewModule } from './review/review.module';
 
     ReviewModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [AppController, ProductExtrasController],
+  providers: [AppService, ProductExtrasService],
 })
 export class AppModule {}
