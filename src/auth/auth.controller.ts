@@ -29,7 +29,9 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('signup')
-  registerUser(@Body() createUserDto: CreateUserDto) {
+  registerUser(@Body() createUserDto: CreateUserDto, @Request() req) {
+    console.log(req.body);
+
     return this.authService.registerUser(createUserDto);
   }
 
@@ -43,7 +45,9 @@ export class AuthController {
   @UseGuards(LocalAuthGuard)
   @Post('login')
   loginUser(@Request() req) {
-    // return req.user; // Authenticated user is attached to req.user
+    // return req.user; // Authenticated user is attached to req.
+    // console.log('lginData123', req.body, req.headers);
+
     return this.authService.login(
       req.user.id,
       req.user.username,
@@ -71,31 +75,33 @@ export class AuthController {
     return { message: 'Password has been successfully reset!' };
   }
 
-  @Roles('ADMIN', 'EDITOR')
-  @UseGuards(RolesGuard)
+  // @Roles('ADMIN', 'EDITOR')
+  // @UseGuards(RolesGuard)
   @UseGuards(JwtAuthGuard) //now we no need buz we defined in auth module global guard
   @Get('protected')
   getAll(@Request() req) {
+    console.log('🔥 protect123 - Headers:', req.headers);
+    console.log('🔑 protect123 - User:', req.user);
+
     return {
-      message: `You have accessed a protected API. This is your user ID: ${req.user.id}`,
+      message: `You have accessed a protected API. This is your user ID: ${req.user?.id}`,
     };
   }
-  // @UseGuards(RefreshAuthGuard)
-  // @Post("refresh")
-  // refreshToken(@Request() req) {
-  //   return this.authService.refreshToken(req.user.id, req.user.username)
-  // }
+
   // @Public()
   @UseGuards(RefreshAuthGuard)
   @Post('refresh')
   refreshToken(@Request() req) {
-    console.log('Received Refresh Token:', req.body.refresh); // Debugging Log
+    console.log('RefTokenRecieve🔥:', req.body.refresh);
     return this.authService.refreshToken(req.user.id, req.user.username);
   }
+
   // @Public()
   @UseGuards(GoogleAuthGuard)
   @Get('google/login')
-  async googleLogin() {}
+  async googleLogin(@Request() req) {
+    console.log('dataG123', req.body, req.headers);
+  }
 
   // @Public()
   @UseGuards(GoogleAuthGuard)
@@ -115,6 +121,9 @@ export class AuthController {
   @UseGuards(JwtAuthGuard) //now we no need buz we defined in auth module global guard
   @Post('signout')
   signOut(@Req() req) {
+    // console.log('Request headers:', req.headers);
+    // console.log('User ID:', req.user?.id);
+
     return this.authService.signOut(req.user.id);
   }
 }

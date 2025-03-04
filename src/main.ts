@@ -9,10 +9,17 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   // ✅ Enable CORS
+  // app.enableCors({
+  //   origin: 'http://localhost:3000',
+  //   methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  //   credentials: true,
+  //   allowedHeaders: ['Content-Type', 'Authorization'],
+  // });
   app.enableCors({
-    origin: 'http://localhost:3000',
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    origin: 'http://localhost:3000', // Allow only this origin
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE', // Allowed HTTP methods
+    credentials: true, // Allow cookies and credentials
+    allowedHeaders: 'Content-Type, Authorization', // Allowed headers
   });
 
   app.useGlobalPipes(

@@ -96,6 +96,13 @@ export class AuthService {
       userId,
       hashedRefreshToken
     );
+    // console.log('ReturnLOginRes123', {
+    //   userId,
+    //   username,
+    //   role,
+    //   refreshToken,
+    //   accessToken,
+    // });
 
     return {
       id: userId,
@@ -223,6 +230,7 @@ export class AuthService {
 
     if (!refreshTokenMatched)
       throw new UnauthorizedException('Invalid refresh token');
+    console.log('validateId', user.id);
 
     return { id: user.id };
   }
@@ -236,6 +244,7 @@ export class AuthService {
       userId,
       hashedRefreshToken
     );
+    console.log('refTokenReturn🔥:', 'AT', accessToken, 'RT', refreshToken);
 
     return {
       id: userId,
@@ -252,6 +261,8 @@ export class AuthService {
   }
 
   async signOut(userId: number) {
+    console.log('useridAtBackend', userId);
+
     return await this.usersService.updateHashedRefreshToken(userId, null);
   }
 }
