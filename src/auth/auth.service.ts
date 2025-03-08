@@ -6,17 +6,17 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { verify } from 'argon2';
-import { CreateUserDto } from 'src/user/dto/create-user-dto';
-import { UserService } from 'src/user/user.service';
+import { CreateUserDto } from 'src/users/dto/create-user-dto';
+import { UserService } from 'src/users/user.service';
 import { AuthJwtPayload } from './type/auth-jwtPayload';
 import { JwtService } from '@nestjs/jwt';
 import refreshConfig from './config/refresh.config';
 import { ConfigType } from '@nestjs/config';
 import { HashService } from 'src/common/hash/hash.service';
 import { Role } from '@prisma/client';
-import { MailService } from 'src/mail/mail.service';
+import { MailService } from 'src/mailers/mail.service';
 import { v4 as uuidv4 } from 'uuid';
-import { log } from 'console';
+import { error, log } from 'console';
 
 @Injectable()
 export class AuthService {
@@ -55,8 +55,6 @@ export class AuthService {
   }
 
   async verifyEmail(token: string) {
-    console.log('Received token:', token);
-
     // Find the user by the verification token
     const user = await this.usersService.findByVerificationToken(token);
     if (!user) {
@@ -70,17 +68,20 @@ export class AuthService {
       verificationToken: null,
     });
 
-    console.log('Updated user: ', updatedUser);
-
     return { message: 'Email verified successfully!' };
   }
 
   async validateUserLocal(email: string, password: string) {
     const user = await this.usersService.findByEmail(email);
 
+    if (!user)
+      throw new UnauthorizedException(
+        'User not found. Please register your account!'
+      );
+
     if (!user?.isVerified) {
       throw new UnauthorizedException(
-        'please register or verify your account!'
+        'User not verified. Please register or complete the email verification process.'
       );
     }
 
@@ -90,14 +91,8 @@ export class AuthService {
       );
     }
 
-    if (!user)
-      throw new UnauthorizedException(
-        'User not found. Please register your account!'
-      );
-
     const isPasswordMatched = await verify(user.password, password); // Ensure `await` is used
-    if (!isPasswordMatched)
-      throw new UnauthorizedException('Wrong password! Please try again.');
+    if (!isPasswordMatched) throw new UnauthorizedException('Wrong password');
 
     return { id: user.id, username: user.username, role: user.role }; // Return user if authentication is successful
   }
@@ -123,7 +118,6 @@ export class AuthService {
   }
 
   async requestedPasswordReset(email: string) {
-    console.log('reset email received:', email);
     const user = await this.usersService.findByEmail(email);
 
     if (!user) {
@@ -149,15 +143,12 @@ export class AuthService {
   }
 
   async resetPassword(token: string, newPassword: string) {
-    // ✅ Find user (DO NOT hash token before searching)
-    console.log('12sk', token, newPassword);
     const user = await this.usersService.findUserByResetToken(token);
 
     if (!user || !user.resetPasswordToken) {
       throw new UnauthorizedException('Invalid or expired reset token.');
     }
 
-    // ✅ Verify the plain token against the stored hashed token
     const isValid = await this.hashService.verifyPassword(
       user.resetPasswordToken,
       token
@@ -183,28 +174,6 @@ export class AuthService {
 
     return { message: 'Password reset successful. Please log in.' };
   }
-
-  //   async resetPassword(token: string, newPassword: string) {
-  //     const hashedResetToken = this.hashService.hashPassword(token);
-
-  //     const user = await this.usersService.findUserByResetToken(hashedToken);
-
-  //     if (!user || user.resetPasswordExpires < new Date()) {
-  //       throw new UnauthorizedException('Invalid or expired reset token.');
-  //     }
-
-  //     // Hash new password before saving
-  //     const hashedPassword = await bcrypt.hash(newPassword, 10);
-
-  //     // Update user password and remove reset token
-  //     await this.usersService.update(user.id, {
-  //       password: hashedPassword,
-  //       resetPasswordToken: null,
-  //       resetPasswordExpires: null,
-  //     });
-
-  //     return { message: 'Password reset successful. Please log in.' };
-  //   }
 
   async generateTokens(userId: number) {
     const payload: AuthJwtPayload = { sub: userId };
