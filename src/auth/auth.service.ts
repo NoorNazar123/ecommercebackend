@@ -136,15 +136,12 @@ export class AuthService {
   }
 
   async resetPassword(token: string, newPassword: string) {
-    // ✅ Find user (DO NOT hash token before searching)
-    // console.log('12sk', token, newPassword);
     const user = await this.usersService.findUserByResetToken(token);
 
     if (!user || !user.resetPasswordToken) {
       throw new UnauthorizedException('Invalid or expired reset token.');
     }
 
-    // ✅ Verify the plain token against the stored hashed token
     const isValid = await this.hashService.verifyPassword(
       user.resetPasswordToken,
       token
