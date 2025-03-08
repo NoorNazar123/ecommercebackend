@@ -13,7 +13,6 @@ export class UserService {
 
   async create(createUserDto: CreateUserDto, verificationToken?: string) {
     const { password, ...user } = createUserDto;
-    // console.log(createUserDto.username);
     const hashedPassword = await this.hashService.hashPassword(
       createUserDto.password
     );

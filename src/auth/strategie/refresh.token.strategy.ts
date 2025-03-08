@@ -30,13 +30,11 @@ export class RereshStrategy extends PassportStrategy(Strategy, 'refresh-jwt') {
 
   //request.user
   async validate(req: Request, payload: AuthJwtPayload) {
-    console.log('🔑 JWT Payload:', payload, 'body:)🔑', req.body);
     const userId = payload.sub;
     const refreshToken = req.body.refresh;
     if (!userId || !refreshToken) {
       throw new UnauthorizedException('User not found');
     }
-    // console.log(userId, refreshToken);
 
     return this.authService.validateRefreshToken(userId, refreshToken); // ya id return kar rha ha
   }

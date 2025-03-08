@@ -16,7 +16,7 @@ import { HashService } from 'src/common/hash/hash.service';
 import { Role } from '@prisma/client';
 import { MailService } from 'src/mailers/mail.service';
 import { v4 as uuidv4 } from 'uuid';
-import { log } from 'console';
+import { error, log } from 'console';
 
 @Injectable()
 export class AuthService {
@@ -55,8 +55,6 @@ export class AuthService {
   }
 
   async verifyEmail(token: string) {
-    console.log('Received token:', token);
-
     // Find the user by the verification token
     const user = await this.usersService.findByVerificationToken(token);
     if (!user) {
@@ -70,18 +68,24 @@ export class AuthService {
       verificationToken: null,
     });
 
-    console.log('Updated user: ', updatedUser);
-
     return { message: 'Email verified successfully!' };
   }
 
   async validateUserLocal(email: string, password: string) {
     const user = await this.usersService.findByEmail(email);
+
     if (!user)
       throw new UnauthorizedException('User not found. Please register!');
 
+    if (!user?.isVerified) {
+      throw new UnauthorizedException(
+        'User not verified. Please register or complete the email verification process.'
+      );
+    }
+
     const isPasswordMatched = await verify(user.password, password); // Ensure `await` is used
-    if (!isPasswordMatched) throw new UnauthorizedException('Wrong password');
+    if (!isPasswordMatched)
+      throw new UnauthorizedException('Incorrect password. Please try again.');
 
     return { id: user.id, username: user.username, role: user.role }; // Return user if authentication is successful
   }
@@ -96,13 +100,6 @@ export class AuthService {
       userId,
       hashedRefreshToken
     );
-    // console.log('ReturnLOginRes123', {
-    //   userId,
-    //   username,
-    //   role,
-    //   refreshToken,
-    //   accessToken,
-    // });
 
     return {
       id: userId,
@@ -114,7 +111,6 @@ export class AuthService {
   }
 
   async requestedPasswordReset(email: string) {
-    console.log('reset email received:', email);
     const user = await this.usersService.findByEmail(email);
 
     if (!user) {
@@ -141,7 +137,7 @@ export class AuthService {
 
   async resetPassword(token: string, newPassword: string) {
     // ✅ Find user (DO NOT hash token before searching)
-    console.log('12sk', token, newPassword);
+    // console.log('12sk', token, newPassword);
     const user = await this.usersService.findUserByResetToken(token);
 
     if (!user || !user.resetPasswordToken) {
@@ -174,28 +170,6 @@ export class AuthService {
 
     return { message: 'Password reset successful. Please log in.' };
   }
-
-  //   async resetPassword(token: string, newPassword: string) {
-  //     const hashedResetToken = this.hashService.hashPassword(token);
-
-  //     const user = await this.usersService.findUserByResetToken(hashedToken);
-
-  //     if (!user || user.resetPasswordExpires < new Date()) {
-  //       throw new UnauthorizedException('Invalid or expired reset token.');
-  //     }
-
-  //     // Hash new password before saving
-  //     const hashedPassword = await bcrypt.hash(newPassword, 10);
-
-  //     // Update user password and remove reset token
-  //     await this.usersService.update(user.id, {
-  //       password: hashedPassword,
-  //       resetPasswordToken: null,
-  //       resetPasswordExpires: null,
-  //     });
-
-  //     return { message: 'Password reset successful. Please log in.' };
-  //   }
 
   async generateTokens(userId: number) {
     const payload: AuthJwtPayload = { sub: userId };
@@ -230,7 +204,6 @@ export class AuthService {
 
     if (!refreshTokenMatched)
       throw new UnauthorizedException('Invalid refresh token');
-    console.log('validateId', user.id);
 
     return { id: user.id };
   }
@@ -244,7 +217,6 @@ export class AuthService {
       userId,
       hashedRefreshToken
     );
-    console.log('refTokenReturn🔥:', 'AT', accessToken, 'RT', refreshToken);
 
     return {
       id: userId,
@@ -261,8 +233,6 @@ export class AuthService {
   }
 
   async signOut(userId: number) {
-    console.log('useridAtBackend', userId);
-
     return await this.usersService.updateHashedRefreshToken(userId, null);
   }
 }
