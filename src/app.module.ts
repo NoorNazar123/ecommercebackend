@@ -23,8 +23,8 @@ import { ProductExtrasService } from './products/product-extras.service';
     AuthModule,
     UserModule,
     ConfigModule.forRoot({
-      isGlobal: true, // Makes the configuration available globally
-      envFilePath: '.env', // Explicitly load the .env file
+      isGlobal: true,
+      envFilePath: '.env',
     }),
     MailModule,
     ProductsModule,

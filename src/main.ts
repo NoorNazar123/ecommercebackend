@@ -8,18 +8,11 @@ import { ResponseInterceptor } from './interceptors/response.interceptor';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // ✅ Enable CORS
-  // app.enableCors({
-  //   origin: 'http://localhost:3000',
-  //   methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  //   credentials: true,
-  //   allowedHeaders: ['Content-Type', 'Authorization'],
-  // });
   app.enableCors({
-    origin: 'http://localhost:3000', // Allow only this origin
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE', // Allowed HTTP methods
-    credentials: true, // Allow cookies and credentials
-    allowedHeaders: 'Content-Type, Authorization', // Allowed headers
+    origin: 'http://localhost:3000',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true,
+    allowedHeaders: 'Content-Type, Authorization',
   });
 
   app.useGlobalPipes(
@@ -31,18 +24,17 @@ async function bootstrap() {
 
   app.useGlobalInterceptors(new ResponseInterceptor());
 
-  // Configure Swagger
   const config = new DocumentBuilder()
     .setTitle('E-commerce API')
     .setDescription('API documentation for the e-commerce backend')
     .setVersion('1.0')
-    .addBearerAuth() // Enable JWT Authentication
+    .addBearerAuth()
     .build();
 
   const document = SwaggerModule.createDocument(app, config, {
     deepScanRoutes: true,
   });
-  SwaggerModule.setup('api-docs', app, document); // Serve Swagger UI at /api-docs
+  SwaggerModule.setup('api-docs', app, document);
 
   await app.listen(process.env.PORT || 8080, () => {
     console.log(`server on post: ${process.env.PORT}`);
