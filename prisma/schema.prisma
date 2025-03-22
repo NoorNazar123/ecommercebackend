@@ -14,22 +14,238 @@ datasource db {
 }
 
 model User {
-  id                 Int      @id @default(autoincrement())
-  username           String   @unique
-  email              String   @unique
-  password           String
-  hashedRefreshToken String?
-  isVerified         Boolean  @default(false)
-  verificationToken  String?  @unique    
-  resetPasswordToken    String?  
-  resetPasswordExpires  DateTime? 
-  role               Role     @default(USER)
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  id                   Int       @id @default(autoincrement())
+  username             String    @unique
+  email                String    @unique
+  password             String
+  hashedRefreshToken   String?
+  isVerified           Boolean   @default(false)
+  verificationToken    String?   @unique
+  resetPasswordToken   String?
+  resetPasswordExpires DateTime?
+  role                 Role      @default(USER)
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  firstName String?
+  lastName  String?
+  phone     String?
+  avatar    String? // Profile picture URL
+
+  ProductReview ProductReview[]
+
+  Cart Cart[]
+
+  Wishlist Wishlist[]
+
+  Order Order[]
+
+  Address Address[]
 }
 
 enum Role {
   ADMIN
   EDITOR
   USER
+}
+
+model Product {
+  id          Int               @id @default(autoincrement())
+  name        String
+  description String?
+  price       Decimal
+  stock       Int
+  sku         String            @unique
+  images      String[] // Array to store multiple image URLs
+  categoryId  Int
+  category    Category          @relation(fields: [categoryId], references: [id], onDelete: Cascade) // Enforce deletion rule
+  isActive    Boolean           @default(true)
+  gender      Gender?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  variants    ProductVariant[]
+  reviews     ProductReview[]
+  discounts   ProductDiscount[]
+
+  CartItem CartItem[]
+
+  WishlistItem WishlistItem[]
+
+  OrderItem OrderItem[]
+}
+
+enum Gender {
+  male
+  female
+  unisex
+}
+
+model Category {
+  id          Int       @id @default(autoincrement())
+  name        String    @unique
+  description String?
+  products    Product[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model ProductVariant {
+  id        Int      @id @default(autoincrement())
+  productId Int
+  product   Product  @relation(fields: [productId], references: [id])
+  name      String // Example: "Red, Medium"
+  price     Decimal
+  stock     Int
+  sku       String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// optinal if user can deit review
+model ProductReview {
+  id        Int      @id @default(autoincrement())
+  productId Int
+  product   Product  @relation(fields: [productId], references: [id])
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  rating    Int // 1-5 scale
+  review    String?
+  createdAt DateTime @default(now())
+}
+
+model ProductDiscount {
+  id           Int          @id @default(autoincrement())
+  productId    Int
+  product      Product      @relation(fields: [productId], references: [id])
+  discountType DiscountType // Enum (Fixed or Percentage)
+  value        Decimal // Discount amount (10% or $10)
+  startDate    DateTime?
+  endDate      DateTime?
+  isActive     Boolean      @default(true)
+}
+
+enum DiscountType {
+  PERCENTAGE
+  FIXED
+}
+
+model Cart {
+  id        Int        @id @default(autoincrement())
+  userId    Int        @unique
+  user      User       @relation(fields: [userId], references: [id])
+  items     CartItem[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model CartItem {
+  id        Int      @id @default(autoincrement())
+  cartId    Int
+  cart      Cart     @relation(fields: [cartId], references: [id])
+  productId Int
+  product   Product  @relation(fields: [productId], references: [id])
+  quantity  Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([cartId, productId]) // Add this line
+}
+
+model Wishlist {
+  id        Int            @id @default(autoincrement())
+  userId    Int            @unique
+  user      User           @relation(fields: [userId], references: [id])
+  items     WishlistItem[]
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+}
+
+model WishlistItem {
+  id         Int      @id @default(autoincrement())
+  wishlistId Int
+  wishlist   Wishlist @relation(fields: [wishlistId], references: [id])
+  productId  Int
+  product    Product  @relation(fields: [productId], references: [id])
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Order {
+  id            Int           @id @default(autoincrement())
+  userId        Int
+  user          User          @relation(fields: [userId], references: [id])
+  items         OrderItem[]
+  totalPrice    Decimal
+  addressId     Int?
+  address       Address?      @relation(fields: [addressId], references: [id])
+  status        OrderStatus   @default(PENDING)
+  paymentStatus PaymentStatus @default(UNPAID)
+  Payment       Payment[]
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+}
+
+model OrderItem {
+  id        Int      @id @default(autoincrement())
+  orderId   Int
+  order     Order    @relation(fields: [orderId], references: [id])
+  productId Int
+  product   Product  @relation(fields: [productId], references: [id])
+  quantity  Int
+  price     Decimal
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+  UNPAID
+  PAID
+}
+
+model Payment {
+  id        Int           @id @default(autoincrement())
+  paymentId String        @unique // Payment ID from PayPal/Stripe
+  orderId   Int
+  order     Order         @relation(fields: [orderId], references: [id])
+  amount    Decimal
+  currency  String
+  method    PaymentMethod // e.g., PayPal, Stripe, Credit Card
+  status    PaymentStatus @default(PENDING)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+}
+
+enum PaymentMethod {
+  PAYPAL
+  STRIPE
+  CREDIT_CARD
+}
+
+model Address {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  street      String?
+  city        String?
+  state       String?
+  postalCode  String?
+  country     String?
+  fullAddress String?
+  isDefault   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  addressType String? // Added addressType field
+  Order       Order[]
 }
